@@ -1,0 +1,28 @@
+{
+  "name": "repository-bridge",
+  "version": "0.5.0",
+  "description": "This module provides a simple CRUD API, enabling  applications to normalize the use of different P2P repositories.",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "ava test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/copious-world/repository-bridge.git"
+  },
+  "keywords": [
+    "respository",
+    "IPFS",
+    "P2P",
+    "bridge"
+  ],
+  "author": "R. Leddy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/copious-world/repository-bridge/issues"
+  },
+  "homepage": "https://github.com/copious-world/repository-bridge#readme"
+}
