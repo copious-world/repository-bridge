@@ -26,7 +26,7 @@ module.exports = {
                 }
             })
             //
-            const id = await this.ipfs.id()
+            const id = await node.id()
             console.log(id)
             //
             const version = await node.version()
@@ -40,6 +40,16 @@ module.exports = {
         "stringify" : (repo_record) => {
             let id_str = repo_record.cid.toString()
             return id_str
+        },
+        "fetch" : async (cid,node) => {
+                let ipfs = node
+                let chunks = []
+                for await ( const chunk of ipfs.cat(cid) ) {
+                    chunks.push(chunk)
+                }
+                let buff = Buffer.concat(chunks)
+                let data = buff.toString()
+                return data
         }
     }
 
