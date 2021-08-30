@@ -1,4 +1,5 @@
 
+const { Multiaddr } = require('multiaddr')
 
 module.exports = {
     //
@@ -17,14 +18,28 @@ module.exports = {
                 config: {
                     Addresses: {
                         Swarm: [
-                        `/ip4/0.0.0.0/tcp/${cnfg.swarm_tcp}`,
-                        `/ip4/127.0.0.1/tcp/${cnfg.swarm_ws}/ws`
+                            `/ip4/0.0.0.0/tcp/${cnfg.swarm_tcp}`,
+                            `/ip4/127.0.0.1/tcp/${cnfg.swarm_ws}/ws`,
+                            "/ip4/0.0.0.0/udp/4001/quic",
+                            "/ip6/::/udp/4001/quic"
                         ],
                         API: `/ip4/127.0.0.1/tcp/${cnfg.api_port}`,
                         Gateway: `/ip4/127.0.0.1/tcp/${cnfg.tcp_gateway}`
                     }
                 }
             })
+            //
+            if ( (cnfg.add_boostrap !== undefined) && cnfg.add_boostrap ) {
+                let additional = cnfg.add_boostrap
+                for ( let peer_addr of additional ) {
+                    try {
+                        const peer = new Multiaddr(peer_addr)
+                        await node.bootstrap.add(peer)
+                    } catch (e) {
+                        console.log(e)
+                    }
+                }
+            }
             //
             const id = await node.id()
             console.log(id)
@@ -50,7 +65,35 @@ module.exports = {
                 let buff = Buffer.concat(chunks)
                 let data = buff.toString()
                 return data
+        },
+        "diagnotistic" :  async (which,node) => {
+            let ipfs = node
+            let data = ""
+            //
+            switch ( which ) {
+                case "peers" : {
+                    //
+                    break;
+                }
+                case "ls-pins" : {
+                    for await (const { cid, type } of ipfs.pin.ls()) {
+                        console.log({ cid, type })
+                    }
+                }
+                case "boostrap-peers" : {
+                    const res = await ipfs.bootstrap.list()
+                    const peers = res.Peers
+                    let is_multi = peers.every(ma => Multiaddr.isMultiaddr(ma))
+                    if ( is_multi ) {
+                        data = peers
+                    } else {
+                        data = "broken"
+                    }
+                    break;
+                }
+            }
         }
+
     }
 
 }
