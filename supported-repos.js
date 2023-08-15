@@ -1,99 +1,10 @@
 
-const { Multiaddr } = require('multiaddr')
+const ifps_access = require('./ipfs-link/accessor')
+const tor_access = require('./ipfs-link/accessor')
 
 module.exports = {
     //
-    'ipfs' : {
-        "init" : async (cnfg,IPFS) =>  {
-            let container_dir = cnfg.repo_location
-            if ( container_dir == undefined ) {
-                container_dir =  process.cwd() + "/repos"
-            }
-            //
-            let subdir = cnfg.dir
-            if ( subdir[0] != '/' ) subdir = ('/' + subdir)
-            let repo_dir = container_dir + subdir
-            let node = await IPFS.create({
-                repo: repo_dir,
-                config: {
-                    Addresses: {
-                        Swarm: [
-                            `/ip4/0.0.0.0/tcp/${cnfg.swarm_tcp}`,
-                            `/ip4/127.0.0.1/tcp/${cnfg.swarm_ws}/ws`,
-                            "/ip4/0.0.0.0/udp/4001/quic",
-                            "/ip6/::/udp/4001/quic"
-                        ],
-                        API: `/ip4/127.0.0.1/tcp/${cnfg.api_port}`,
-                        Gateway: `/ip4/127.0.0.1/tcp/${cnfg.tcp_gateway}`
-                    }
-                }
-            })
-            //
-            if ( (cnfg.add_boostrap !== undefined) && cnfg.add_boostrap ) {
-                let additional = cnfg.add_boostrap
-                for ( let peer_addr of additional ) {
-                    try {
-                        const peer = new Multiaddr(peer_addr)
-                        await node.bootstrap.add(peer)
-                    } catch (e) {
-                        console.log(e)
-                    }
-                }
-            }
-            //
-            const id = await node.id()
-            console.log(id)
-            //
-            const version = await node.version()
-            console.log('Version:', version.version)
-            return ['ipfs',node]
-        },
-        "import" : () => {
-            let mod = require('ipfs')
-            return mod
-        },
-        "stringify" : (repo_record) => {
-            let id_str = repo_record.cid.toString()
-            return id_str
-        },
-        "fetch" : async (cid,node) => {
-                let ipfs = node
-                let chunks = []
-                for await ( const chunk of ipfs.cat(cid) ) {
-                    chunks.push(chunk)
-                }
-                let buff = Buffer.concat(chunks)
-                let data = buff.toString()
-                return data
-        },
-        "diagnotistic" :  async (which,node) => {
-            let ipfs = node
-            let data = ""
-            //
-            switch ( which ) {
-                case "peers" : {
-                    //
-                    break;
-                }
-                case "ls-pins" : {
-                    for await (const { cid, type } of ipfs.pin.ls()) {
-                        console.log({ cid, type })
-                    }
-                }
-                case "boostrap-peers" : {
-                    const res = await ipfs.bootstrap.list()
-                    const peers = res.Peers
-                    let is_multi = peers.every(ma => Multiaddr.isMultiaddr(ma))
-                    if ( is_multi ) {
-                        data = peers
-                    } else {
-                        data = "broken"
-                    }
-                    break;
-                }
-            }
-        }
-
-    }
-
+    'ipfs' : ifps_access,
+    'tor': tor_access
+    //
 }
