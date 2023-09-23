@@ -1,6 +1,6 @@
 {
   "name": "repository-bridge",
-  "version": "0.6.1",
+  "version": "0.6.3",
   "description": "This module provides a simple CRUD API, enabling  applications to normalize the use of different P2P repositories.",
   "main": "index.js",
   "directories": {
@@ -17,6 +17,7 @@
     "respository",
     "IPFS",
     "P2P",
+    "bittorrent",
     "bridge"
   ],
   "author": "R. Leddy",
@@ -30,6 +31,9 @@
     "nyc": "^15.1.0"
   },
   "dependencies": {
-    "ipfs": "^0.65.0"
+    "create-torrent": "^6.0.15",
+    "ipfs": "^0.63.5",
+    "qbittorrent-api-v2": "^1.2.2",
+    "transmission-promise": "^1.1.5"
   }
 }

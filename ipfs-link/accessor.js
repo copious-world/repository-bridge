@@ -7,16 +7,16 @@ class WrapNode {
         this.node = a_node
     }
 
-    store_local(object) {
-        this.node.pin.add(object)
+    async store_local(pin_id) {
+        await this.node.pin.add(pin_id)
     }
 
-    rm_local(pin_id) {
-        this.node.pin.rm(pin_id)
+    async rm_local(pin_id) {
+        await this.node.pin.rm(pin_id)
     }
 
-    add(object) {
-        this.node.add(object)
+    async add(object) {
+        return await this.node.add(object)   // this is likely a blob  (encrypted, etc.)
     }
 
     repo() {

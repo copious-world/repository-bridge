@@ -37,6 +37,8 @@ https://djmykey.wordpress.com/2021/06/14/install-qbittorrent-on-raspberry-pi/
 
 
 
+const REPO_KEY = 'torv2'
+
 
 
 module.exports = {   
@@ -66,12 +68,14 @@ module.exports = {
         const id = await node.id()
         console.log(id)
         //
-        const version = await node.version()
-        console.log('Version:', version.version)
-        return ['tor',node]
+        const version = "bittorrent-v1"
+        console.log('Version:', version)
+        //
+        let w_node = new WrapNode(node)
+        return [REPO_KEY,w_node]
     },
     "import" : () => {
-        let mod = require('torrent')
+        let mod = require('qbittorrent-api-v2')
         return mod
     },
     "stringify" : (repo_record) => {
