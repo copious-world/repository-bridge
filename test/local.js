@@ -40,7 +40,7 @@ test('initialization', async t => {
     //
 
     const repo_id = await repo.add('local',{
-        "path": "test",
+        "meta": { "name" : "test", "author" : "tester" },
         "content": "this is blob material"
     })
 
@@ -53,7 +53,7 @@ test('initialization', async t => {
     repo2.store(entry_obj)
 
     const repo_id2 = await repo.add('local',{
-        "path": "test2",
+        "meta": { "name" : "test2", "author" : "tester" },
         "content": "this is blob material number 2"
     })
 
@@ -63,6 +63,7 @@ test('initialization', async t => {
     }
     repo2.replace(entry_obj,entry_obj2)
 
+    console.log(66,repo_id2)
     let output = await repo2.fetch('local',repo_id2)
     console.log(output)
 
