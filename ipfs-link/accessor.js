@@ -101,6 +101,7 @@ module.exports = {
                 for await (const { cid, type } of ipfs.pin.ls()) {
                     console.log({ cid, type })
                 }
+                break;
             }
             case "boostrap-peers" : {
                 const res = await ipfs.bootstrap.list()

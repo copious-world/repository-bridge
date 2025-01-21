@@ -7,7 +7,8 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "ava --verbose test/index.js"
+    "test": "ava --verbose test/index.js",
+    "testl": "ava --verbose test/local.js"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
   },
   "dependencies": {
     "create-torrent": "^6.0.15",
+    "extra-file-class": "^0.9.20",
     "ipfs": "^0.63.5",
     "qbittorrent-api-v2": "^1.2.2",
     "transmission-promise": "^1.1.5"
