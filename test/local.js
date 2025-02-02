@@ -69,4 +69,23 @@ test('initialization', async t => {
 
     //
     t.pass("this is a test")
+
+    console.log(await repo2.ls('local','DOLIKEAMOTH.mp3'))
+    for await ( let m of repo2.ls('local','DOLIKEAMOTH.mp3') ) {
+        console.log("SINGLE ENTRY")
+        console.log(m)
+    }
+    let wcid = await repo2.add_file('local','./test/dat_local/DOLIKEAMOTH.mp3')
+
+    console.log("wcid wcid wcid ",wcid)
+
+
+    for await ( let chnk of repo2.ls('local',wcid) ) {
+        console.dir(chnk)
+    }
+
+    for await ( let chnk of repo2.cat('local',wcid) ) {
+        console.dir(chnk)
+    }
+
 })

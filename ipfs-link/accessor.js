@@ -79,14 +79,22 @@ module.exports = {
         return id_str
     },
     "fetch" : async (cid,w_node) => {
-            let ipfs = w_node.node
-            let chunks = []
-            for await ( const chunk of ipfs.cat(cid) ) {
-                chunks.push(chunk)
-            }
-            let buff = Buffer.concat(chunks)
-            let data = buff.toString()
-            return data
+        let ipfs = w_node.node
+        let chunks = []
+        for await ( const chunk of ipfs.cat(cid) ) {
+            chunks.push(chunk)
+        }
+        let buff = Buffer.concat(chunks)
+        let data = buff.toString()
+        return data
+    },
+    "cat" : (cid,w_node) => {
+        let ipfs = w_node.node
+        return ipfs.cat(cid)
+    },
+    "ls" : (cid,w_node) => {
+        let ipfs = w_node.node
+        return ipfs.ls(cid)
     },
     "diagnotistic" :  async (which,w_node) => {
         let ipfs = w_node.node
