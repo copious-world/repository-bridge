@@ -261,12 +261,12 @@ class WrapNode {
         if ( path !== undefined ) {
             try {
                 let stat = await this.fos.stat(path)
-                yield [stat]
+                yield stat
                 return
             } catch (e) {
             }
         }
-        yield []
+        yield false
     }
 
 
