@@ -54,6 +54,19 @@ class WrapNode {
         this.metas = g_id_meta
     }
 
+
+
+    async reload_file_maps() {
+        let  audit_path = `${this.conf.base_dir}/safety_pins.json`
+        this.dont_delete = await this.fos.load_json_data_at_path(audit_path)
+//
+        let  file_paths = `${this.conf.base_dir}/file_paths.json`
+        this.id_to_path = await this.fos.load_json_data_at_path(file_paths)
+// 
+        let meta_path = `${this.conf.base_dir}/file_metas.json`
+        this.metas = await this.fos.load_json_data_at_path(meta_path)
+    }
+
     async store_local(pin_id) {
         let meta = this.id_to_path[pin_id]
         if ( meta !== undefined ) {
@@ -269,6 +282,7 @@ module.exports = {
         console.log("Running local repository... repository bridge")
 
         let w_node = new WrapNode(this.fos,this.conf)
+        await w_node.reload_file_maps()
         return ['local',w_node ]
     },
     "import" : () => {
