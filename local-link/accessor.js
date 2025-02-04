@@ -67,6 +67,21 @@ class WrapNode {
         this.metas = await this.fos.load_json_data_at_path(meta_path)
     }
 
+    setup_file_watch() {
+        let file_paths = `${this.conf.base_dir}/file_paths.json`
+        this.fos.fs.watchFile(file_paths,async (curr,prev) => {
+            if ( curr.mtime !== prev.mtime ) {
+                await reload_file_maps()
+            }
+        })
+        let audit_path = `${this.conf.base_dir}/safety_pins.json`
+        this.fos.fs.watchFile(audit_path,async (curr,prev) => {
+            if ( curr.mtime !== prev.mtime ) {
+                this.dont_delete = await this.fos.load_json_data_at_path(audit_path)
+            }
+        })
+    }
+
     async store_local(pin_id) {
         let meta = this.id_to_path[pin_id]
         if ( meta !== undefined ) {
@@ -283,6 +298,7 @@ module.exports = {
 
         let w_node = new WrapNode(this.fos,this.conf)
         await w_node.reload_file_maps()
+        await w_node.setup_file_watch()
         return ['local',w_node ]
     },
     "import" : () => {
