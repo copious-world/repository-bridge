@@ -1,0 +1,5 @@
+{
+ "ifps"     : "./ipfs-link/accessor",
+ "tor"      : "./torv1-link/accessor",
+ "local"    : "./local-link/accessor"
+}

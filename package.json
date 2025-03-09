@@ -1,8 +1,11 @@
 {
   "name": "repository-bridge",
-  "version": "0.7.6",
+  "version": "0.8.6",
   "description": "This module provides a simple CRUD API, enabling  applications to normalize the use of different P2P repositories.",
   "main": "index.js",
+  "bin" : {
+    "repo-bridge-update" : "./tools/generate_supported"
+  },
   "directories": {
     "lib": "lib"
   },
