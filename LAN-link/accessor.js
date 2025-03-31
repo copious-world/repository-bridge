@@ -246,15 +246,10 @@ class WrapNode {
             let message = {
                 "op" : "ADD",
                 "parameters" : {
-                    "cid" : cid,
-                    "path" : path,
-                    "from" : {              // tell the node what it needs to get the file via scp
-                        "address" : this.messenger.address,
-                        "dir" : this.conf.base_dir
-                    }    
+                    "cid" : cid
                 }
             }
-            let result = this.set_on_path(message,"LAN-repo")
+            let result = this.set_on_path(message,"LAN-repo")  // where to upload te file
             if ( result && (result.status === "OK") ) {
                 let scp_path = result.data.scp_path
                 await this.#file_writer(cid,scp_path,object)     // write the file locally

@@ -98,7 +98,7 @@ class WrapNode {
 
     /**
      * 
-     * @param {string}} pin_id 
+     * @param {string} pin_id 
      */
     async rm_local(pin_id) {
         let findex = this.dont_delete.indexOf(pin_id)
@@ -109,9 +109,6 @@ class WrapNode {
                 let file_exists = await this.fos.exists(path)
                 if ( file_exists ) {
                     await this.fos.file_remover(path)
-                    this.dont_delete.splice(findex,1)
-                    let  audit_path = `${this.conf.base_dir}/safety_pins.json`
-                    await this.fos.output_json(audit_path,this.dont_delete)
 //
                     delete this.id_to_path[pin_id]
                     let  file_paths = `${this.conf.base_dir}/file_paths.json`

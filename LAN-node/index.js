@@ -7,15 +7,197 @@ class LANOperations extends OperationsMessageEndpoint {
 
     constructor(conf) {
         super(conf)
+        //
+        this.dont_delete = []
+        this.id_to_path = {}
+        this.metas = {}
+
+        this.reload_file_maps()
+        this.setup_file_watch()
     }
 
+
+    async reload_file_maps() {
+        let  audit_path = `${this.conf.base_dir}/safety_pins.json`
+        this.dont_delete = await this.fos.load_json_data_at_path(audit_path)
+//
+        let  file_paths = `${this.conf.base_dir}/file_paths.json`
+        this.id_to_path = await this.fos.load_json_data_at_path(file_paths)
+// 
+        let meta_path = `${this.conf.base_dir}/file_metas.json`
+        this.metas = await this.fos.load_json_data_at_path(meta_path)
+    }
+
+    setup_file_watch() {
+        let file_paths = `${this.conf.base_dir}/file_paths.json`
+        let self = this
+        this.fos.fs.watchFile(file_paths,async (curr,prev) => {
+            if ( curr.mtime !== prev.mtime ) {
+                await self.reload_file_maps()
+            }
+        })
+        let audit_path = `${this.conf.base_dir}/safety_pins.json`
+        this.fos.fs.watchFile(audit_path,async (curr,prev) => {
+            if ( curr.mtime !== prev.mtime ) {
+                this.dont_delete = await self.fos.load_json_data_at_path(audit_path)
+            }
+        })
+    }
+
+
+    async store_local(pin_id) {
+        let meta = this.id_to_path[pin_id]
+        if ( meta !== undefined ) {
+            let path = `${this.conf.base_dir}/${pin_id}`
+            let file_exists = await this.fos.exists(path)
+            if ( file_exists && (this.dont_delete.indexOf(pin_id) < 0) ) {
+                this.dont_delete.push(pin_id)
+                path = `${this.conf.base_dir}/safety_pins.json`
+                await this.fos.output_json(path,this.dont_delete)
+                return path
+            }
+        }
+        return false
+    }
+
+
+
+    // Here object is a blob
+    async add(cid,meta) {
+        let path = `${this.conf.base_dir}/${cid}`
+        //
+        this.metas[cid] = meta
+        let  meta_path = `${this.conf.base_dir}/file_metas.json`
+        await this.fos.output_json(meta_path,this.metas)
+
+        this.id_to_path[cid] = path
+        let  paths_path = `${this.conf.base_dir}/file_paths.json`
+        await this.fos.output_json(paths_path,this.id_to_path)
+        //
+        return path  // this is likely a blob  (encrypted, etc.)
+    }
+
+
+    /**
+     * 
+     * @param {string}} pin_id 
+     */
+    async rm_local(pin_id) {
+        let findex = this.dont_delete.indexOf(pin_id)
+        if ( findex < 0 ) {
+            let its_path = this.id_to_path[pin_id]
+            if ( its_path !== undefined ) {
+                let path = `${this.conf.base_dir}/${pin_id}`
+                let file_exists = await this.fos.exists(path)
+                if ( file_exists ) {
+                    await this.fos.file_remover(path)
+                    //
+                    delete this.id_to_path[pin_id]
+                    let  file_paths = `${this.conf.base_dir}/file_paths.json`
+                    await this.fos.output_json(file_paths,this.id_to_path)
+// 
+                    delete this.metas[pin_id]
+                    let meta_path = `${this.conf.base_dir}/file_metas.json`
+                    await this.fos.output_json(meta_path,this.metas)
+                }    
+            }
+        }
+    }
+
+    /**
+     * 
+     * @param {string} pin_id 
+     */
+    async unpin_local(pin_id) {
+        let findex = this.dont_delete.indexOf(pin_id)
+        if ( findex >= 0 ) {
+            this.dont_delete.splice(findex,1)
+            let  audit_path = `${this.conf.base_dir}/safety_pins.json`
+            await this.fos.output_json(audit_path,this.dont_delete)
+
+            let path = `${this.conf.base_dir}/${pin_id}`
+            let file_exists = await this.fos.exists(path)
+            if ( file_exists ) {
+                return path
+            }
+        }
+        return false
+    }
+
+
+
     async application_operation_cmd_handling(cmd_op,parameters) {
-        console.log("The application should implement the application_operation_cmd_handling method ")
+        switch ( cmd_op ) {
+            case "WANT" : {
+                //
+                let {cid, pin} = parameters
+                let return_data = {
+                    "_app_log" : ""
+                }
+                //
+                if ( pin ) {
+                    let path = await this.store_local(cid)
+                    if ( path ) {
+                        return_data.scp_location = path
+                    } else {
+                        return false
+                    }
+                }
+                //
+                return return_data
+            }
+            case "PIN" : {
+                let {cid, pin} = parameters
+                let return_data = {
+                    "_app_log" : ""
+                }
+                //
+                if ( pin ) {
+                    let path = await this.store_local(cid)
+                    if ( path ) {
+                        return_data.scp_location = path
+                    } else {
+                        return false
+                    }
+                } else {
+                    let path = await this.unpin_local(cid)
+                    return_data.scp_location = path
+                }
+                //
+                return return_data
+            }
+        }
+        
         return { "action" : "noop" }
     }
 
     async application_operation_info_handling(cmd_op,parameters) {
-        console.log("The application should implement the application_operation_cmd_handling method ")
+        switch ( cmd_op ) {
+            case "ADD" : {
+                let {cid, meta} = parameters
+                let return_data = {
+                    "_app_log" : ""
+                }
+                //
+                let path = await this.add(cid,meta)
+                if ( path ) {
+                    return_data.scp_location = path
+                }
+                //
+                return return_data
+            }
+            case "UNPIN" : {
+                let {cid} = parameters
+                let return_data = {
+                    "_app_log" : ""
+                }
+                //
+                let path = await this.unpin_local(cid)
+                return_data.scp_location = path
+                //
+                return return_data
+            }
+        }
         return { "action" : "noop" }
     }
 
@@ -55,16 +237,11 @@ class LANOperations extends OperationsMessageEndpoint {
     }
 }
 
-"SET" data.scp_location
+"GET" data.scp_location
 {
     "op" : "ADD",
     "parameters" : {
-        "cid" : cid,
-        "path" : path,
-        "from" : {              // tell the node what it needs to get the file via scp
-            "address" : this.messenger.address,
-            "dir" : this.conf.base_dir
-        }    
+        "cid" : cid  // make way for this 
     }
 }
 
