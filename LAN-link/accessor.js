@@ -240,7 +240,6 @@ class WrapNode {
     // Here object is a blob
     async add(object) {
         let cid = await hash_of(object)
-        let path = `${this.conf.base_dir}/${cid}`
         //
         if ( this.messenger ) {
             let message = {

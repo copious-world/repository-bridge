@@ -3,8 +3,8 @@
   "version": "0.8.7",
   "description": "This module provides a simple CRUD API, enabling  applications to normalize the use of different P2P repositories.",
   "main": "index.js",
-  "bin" : {
-    "repo-bridge-update" : "./tools/generate_supported"
+  "bin": {
+    "repo-bridge-update": "./tools/generate_supported"
   },
   "directories": {
     "lib": "lib"
@@ -35,6 +35,7 @@
     "nyc": "^15.1.0"
   },
   "dependencies": {
+    "categorical-handlers": "^0.7.2",
     "create-torrent": "^6.0.15",
     "extra-file-class": "^0.9.20",
     "ipfs": "^0.63.5",

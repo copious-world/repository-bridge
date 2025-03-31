@@ -7,6 +7,7 @@ class LANOperations extends OperationsCategory {
 
     constructor(conf) {
         super(conf)
+        this.conf = conf
         //
         this.dont_delete = []
         this.id_to_path = {}
