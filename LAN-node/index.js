@@ -1,9 +1,9 @@
 
-const {OperationsMessageEndpoint} = require('categorical-handlers')
+const {OperationsCategory} = require('categorical-handlers')
 const fs = require('fs')
 
 
-class LANOperations extends OperationsMessageEndpoint {
+class LANOperations extends OperationsCategory {
 
     constructor(conf) {
         super(conf)
@@ -168,7 +168,7 @@ class LANOperations extends OperationsMessageEndpoint {
             }
         }
         
-        return { "action" : "noop" }
+        return false
     }
 
     async application_operation_info_handling(cmd_op,parameters) {
@@ -198,12 +198,12 @@ class LANOperations extends OperationsMessageEndpoint {
                 return return_data
             }
         }
-        return { "action" : "noop" }
+        return false
     }
 
     async application_operation_cmd_reversal(was_cmd_op) {
         console.log("The application should implement the application_operation_cmd_handling method ")
-        return { "action" : "noop" }
+        return false
     }
 
 }
