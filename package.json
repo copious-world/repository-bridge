@@ -39,6 +39,7 @@
     "create-torrent": "^6.0.15",
     "extra-file-class": "^0.9.20",
     "ipfs": "^0.63.5",
+    "message-relay-services": "^0.9.25",
     "qbittorrent-api-v2": "^1.2.2",
     "transmission-promise": "^1.1.5"
   }

@@ -21,12 +21,24 @@ class LANOperations extends OperationsCategory {
     async reload_file_maps() {
         let  audit_path = `${this.conf.base_dir}/safety_pins.json`
         this.dont_delete = await this.fos.load_json_data_at_path(audit_path)
+        if ( this.dont_delete === false ) {
+            this.dont_delete = []
+            await this.fos.output_json(audit_path,this.dont_delete)
+        }
 //
         let  file_paths = `${this.conf.base_dir}/file_paths.json`
         this.id_to_path = await this.fos.load_json_data_at_path(file_paths)
+        if ( this.id_to_path === false ) {
+            this.id_to_path = {}
+            await this.fos.output_json(file_paths,this.id_to_path)
+        }
 // 
         let meta_path = `${this.conf.base_dir}/file_metas.json`
         this.metas = await this.fos.load_json_data_at_path(meta_path)
+        if ( this.metas === false ) {
+            this.metas = {}
+            await this.fos.output_json(meta_path,this.metas)
+        }
     }
 
     setup_file_watch() {

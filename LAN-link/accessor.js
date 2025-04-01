@@ -3,6 +3,7 @@ const {createHash} = require('crypto')
 const {subtle} = require('crypto')
 const util = require('util');
 const path = require('path')
+const {MessageRelayer} = require('message-relay-services')
 
 
 const ScpClient = require('../support_lib/scp_spawner')
@@ -55,7 +56,7 @@ class WrapNode {
         this.id_to_path = g_id_path
         this.metas = g_id_meta
 
-        this.messenger = false
+        this.messenger = new MessageRelayer(conf.node_relay)
         this.scp_client = new ScpClient(conf.address,conf.ssh_user)  // only need the address to tell scp
     }
 
@@ -318,11 +319,11 @@ module.exports = {
     "init" : async (cnfg) =>  {
         this.conf = cnfg
         this.fos = new FileOperations(false)
-        console.log("Running local repository... repository bridge")
+        console.log("Running LAN repository... repository bridge")
 
         let w_node = new WrapNode(this.fos,this.conf)
         await w_node.reload_file_maps()
-        return ['local',w_node ]
+        return ['LAN',w_node ]
     },
     "import" : () => {
         let mod = require('extra-file-class')
