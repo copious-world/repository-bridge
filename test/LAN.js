@@ -105,6 +105,14 @@ async function tester() {
     //
     let repo = new Repository(conf,['LAN'])
     await repo.init_repos()
+    await repo.ready('LAN')
+
+    let datum = {
+        "testing" : "testing",
+        "test" : "test",
+        "testi" : "testi"
+    }
+    await repo.add('LAN',datum)
 }
 
 

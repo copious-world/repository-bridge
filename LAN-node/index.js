@@ -139,7 +139,10 @@ class LANOperations extends OperationsCategory {
 
 
 
-    async application_operation_cmd_handling(cmd_op,parameters) {
+    async application_operation_info_handling(cmd_op,parameters) {
+    console.log(cmd_op)
+    console.dir(parameters)
+    //
         switch ( cmd_op ) {
             case "WANT" : {
                 //
@@ -184,7 +187,7 @@ class LANOperations extends OperationsCategory {
         return false
     }
 
-    async application_operation_info_handling(cmd_op,parameters) {
+    async application_operation_cmd_handling(cmd_op,parameters) {
         switch ( cmd_op ) {
             case "ADD" : {
                 let {cid, meta} = parameters

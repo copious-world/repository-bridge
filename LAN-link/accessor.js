@@ -55,11 +55,34 @@ class WrapNode {
         //
         this.id_to_path = g_id_path
         this.metas = g_id_meta
-
-        this.messenger = new MessageRelayer(conf.node_relay)
+        this.messenger = false
+        this.ready_promise = false
+        this.client_ready = false
+ 
+        this.get_messenger_ready(conf.node_relay)
         this.scp_client = new ScpClient(conf.address,conf.ssh_user)  // only need the address to tell scp
     }
 
+
+    get_messenger_ready(conf) {
+        //
+        let self = this
+        let p = new Promise((resolve,reject) => {
+            self.messenger = new MessageRelayer(conf)
+            self.messenger.on('client-ready',() =>  {
+                self.client_ready = true
+                resolve(true)
+            })
+        })
+        this.ready_promise = p
+        //
+    }
+
+    async ready() {
+        if ( !(this.client_ready) && this.ready_promise ) {
+            await this.ready_promise
+        }
+    }
 
     /**
      * reload_file_maps
@@ -187,7 +210,7 @@ class WrapNode {
                         break;
                     }
                 }
-                
+                //
                 data = await this.fos.readFile(local_path)
                 let obj = {
                     "meta" : meta,
@@ -246,17 +269,16 @@ class WrapNode {
             let message = {
                 "op" : "ADD",
                 "parameters" : {
-                    "cid" : cid
+                    "cid" : cid,
+                    "meta" : object    // ? must be the description of blob and not contain the blob data...
                 }
             }
-            let result = this.set_on_path(message,"LAN-repo")  // where to upload te file
+            let result = this.messenger.set_on_path(message,"LAN-repo")  // where to upload te file
             if ( result && (result.status === "OK") ) {
                 let scp_path = result.data.scp_path
                 await this.#file_writer(cid,scp_path,object)     // write the file locally
             }
-
         }
-
         //
         return cid  // this is likely a blob  (encrypted, etc.)
     }
