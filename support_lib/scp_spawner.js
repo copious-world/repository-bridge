@@ -25,7 +25,9 @@ class ScpClient {
         let p = false
         if ( !(this.cmd_line_password) ) {
             p = new Promise((resolve,reject) => {
-                let spawner = spawn('scp',[`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`,local_file],{})
+                let params = [`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`,local_file]
+    console.log("fetch",params)
+                let spawner = spawn('scp',params,{})
                 spawner.on('exit',(status) => {
                     resolve(true)
                 })    
@@ -35,7 +37,8 @@ class ScpClient {
             })    
         } else {
             p = new Promise((resolve,reject) => {
-                let spawner = spawn("sshpass", "-p", `"${this.cmd_line_password}"`, 'scp',[`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`,local_file],{})
+                let params = ["-p", `"${this.cmd_line_password}"`, 'scp',`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`,local_file]
+                let spawner = spawn("sshpass", params ,{})
                 spawner.on('exit',(status) => {
                     resolve(true)
                 })    
@@ -51,7 +54,9 @@ class ScpClient {
         let p = false
         if ( !(this.cmd_line_password) ) {
             p = new Promise((resolve,reject) => {
-                let spawner = spawn('scp',[local_file,`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`],{})
+                let params = [local_file,`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`]
+console.log("send",params)
+                let spawner = spawn('scp',params,{})
                 spawner.on('exit',(status) => {
                     resolve(true)
                 })    
@@ -61,7 +66,8 @@ class ScpClient {
             })
         } else {
             p = new Promise((resolve,reject) => {
-                let spawner = spawn("sshpass", "-p", `"${this.cmd_line_password}"`, 'scp',[local_file,`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`],{})
+                let params = ["-p", `"${this.cmd_line_password}"`, 'scp',local_file,`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`]
+                let spawner = spawn("sshpass", params,{})
                 spawner.on('exit',(status) => {
                     resolve(true)
                 })    

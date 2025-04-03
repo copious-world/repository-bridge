@@ -7,6 +7,7 @@ const {MessageRelayer} = require('message-relay-services')
 
 
 const ScpClient = require('../support_lib/scp_spawner')
+const LocalCopier = require('../support_lib/cp_spawner')
 
 
 //$>>	do_hash_buffer
@@ -55,16 +56,28 @@ class WrapNode {
         //
         this.id_to_path = g_id_path
         this.metas = g_id_meta
+        //
         this.messenger = false
         this.ready_promise = false
         this.client_ready = false
  
-        this.get_messenger_ready(conf.node_relay)
-        this.scp_client = new ScpClient(conf.address,conf.ssh_user)  // only need the address to tell scp
+        this.ensure_messenger_ready(conf.node_relay)
+        //
+        if ( conf.local_only ) {
+            this.copy_client = false
+            this.copy_client = new LocalCopier()
+        } else {
+            this.copy_client = new ScpClient(conf.address,conf.ssh_user,conf.ssh_pass)  // only need the address to tell scp
+        }
     }
 
 
-    get_messenger_ready(conf) {
+    /**
+     * ensure_messenger_ready
+     * 
+     * @param {object} conf 
+     */
+    ensure_messenger_ready(conf) {
         //
         let self = this
         let p = new Promise((resolve,reject) => {
@@ -82,6 +95,7 @@ class WrapNode {
         if ( !(this.client_ready) && this.ready_promise ) {
             await this.ready_promise
         }
+        this.ready_promise = false
     }
 
     /**
@@ -92,9 +106,17 @@ class WrapNode {
         // Maintain meta information about metas and paths, while pinning will be a topic of the LAN node.
         let  file_paths = `${this.conf.base_dir}/file_paths.json`
         this.id_to_path = await this.fos.load_json_data_at_path(file_paths)
-        // 
+        if ( this.id_to_path === false ) {
+            this.id_to_path = {}
+            await this.fos.output_json(file_paths,this.id_to_path)
+        }
+// 
         let meta_path = `${this.conf.base_dir}/file_metas.json`
         this.metas = await this.fos.load_json_data_at_path(meta_path)
+        if ( this.metas === false ) {
+            this.metas = {}
+            await this.fos.output_json(meta_path,this.metas)
+        }
     }
 
 
@@ -112,7 +134,7 @@ class WrapNode {
      */
     async store_local(pin_id) {
         try {
-            if ( this.messenger && this.scp_client ) {
+            if ( this.messenger && this.copy_client ) {
                 let result = await this.messenger.get_on_path({
                     "op" : "PIN",
                     "parameters" : {
@@ -122,7 +144,7 @@ class WrapNode {
                 },"LAN-repo")
                 if ( result && (result.status === "OK") ) {
                     let scp_location = result.data.scp_location
-                    await this.scp_client.fetch(scp_location,`${this.conf.base_dir}/${pin_id}`)
+                    await this.copy_client.fetch(scp_location,`${this.conf.base_dir}/${pin_id}`)
                 }
             }    
         } catch (e) {
@@ -145,7 +167,12 @@ class WrapNode {
         await this.messenger.set_on_path(message,"LAN-repo")
     }
 
-
+    /**
+     * #ensure_local
+     * 
+     * @param {string} cid 
+     * @returns object -- the meta descriptor of the file
+     */
     async #ensure_local(cid) {
 
         let local_path = `${this.conf.base_dir}/${cid}`
@@ -155,18 +182,18 @@ class WrapNode {
 
         if ( !already_local ) {
             try {
-                if ( this.messenger && this.scp_client ) {
+                if ( this.messenger && this.copy_client ) {
                     let result = await this.messenger.get_on_path({
                         "op" : "WANT",
                         "parameters" : {
-                            "cid" : pin_id,
+                            "cid" : cid,
                             "pin" : false   // don't take the extra action to pin it    
                         }
                     },"LAN-repo")
                     if ( result && (result.status === "OK") ) {
                         meta = result.data.meta
                         let scp_location = result.data.scp_location
-                        await this.scp_client.fetch(scp_location,local_path)
+                        await this.copy_client.fetch(scp_location,local_path)
                     }
                 }    
             } catch (e) {
@@ -191,7 +218,7 @@ class WrapNode {
         let meta = await this.#ensure_local(cid)
         let local_path = `${this.conf.base_dir}/${cid}`
         //
-        if ( local_path !== undefined ) {
+        if ( (local_path !== undefined) && (meta !== undefined) ) {
             try {
                 let data = ""
                 switch ( meta.type ) {
@@ -224,6 +251,48 @@ class WrapNode {
         return false
     }
 
+
+    /**
+     * construct_meta
+     * 
+     * @param {string} cid 
+     * @param {string} type 
+     * @param {string} author 
+     */
+    construct_meta(cid,obj,author) {
+        let type = ""
+        if ( util.types.isUint8Array(obj) ) {
+            type = "Uint8Array"
+        } else if ( typeof some_object === 'string' ) {
+            type = "string"
+        } else {
+            if ( obj.hasOwnProperty('content') ) {
+                if ( obj.hasOwnProperty('meta') ) {
+                    let default_meta = this.construct_meta(cid,obj.content,author)
+                    if ( default_meta ) {  // use the given meta 
+                        obj.meta.type = default_meta.type
+                        return obj.meta
+                    }
+                }
+            } else {
+                if ( obj.meta !== undefined ) {
+                    obj.meta.type = "json"
+                    return obj.meta
+                } else {
+                    type = "json"
+                }
+            }
+        }
+
+        let  meta = {
+            "name" : `${cid}`,
+            "author" : (typeof author === "string") ? author : "unknown",
+            "type" : type
+        }
+        return meta
+    }
+
+
     /**
      * #file_writer
      * 
@@ -233,17 +302,17 @@ class WrapNode {
      * @returns Object | false - the meta descriptor of the object
      */
     async #file_writer(cid,spc_path,some_object) {
-        if ( this.scp_client === false ) return false
+        if ( this.copy_client === false ) return false
         //
         try {
             let path = `${this.conf.base_dir}/${cid}`       // local place to put the file
             if ( util.types.isUint8Array(some_object) || Buffer.isBuffer(some_object) ) {
                 const data = new Uint8Array(some_object);
                 await this.fos.writeFile(path,data,{ "flush" : true })  // WRITE file to local config'd dir
-                this.scp_client.send(path,spc_path)     // SCP straight up (should be configured no password) just spawn
+                this.copy_client.send(path,spc_path)     // SCP straight up (should be configured no password) just spawn
             } else if ( typeof some_object === 'string' ) {
                 await this.fos.writeFile(path,some_object,{ "flush" : true })   // WRITE file
-                this.scp_client.send(path,spc_path)                             // SCP 
+                this.copy_client.send(path,spc_path)                             // SCP 
             } else {
                 let data = false
                 if ( some_object.hasOwnProperty('content') ) {
@@ -251,32 +320,52 @@ class WrapNode {
                 } else {
                     data = JSON.stringify(some_object)
                     await this.fos.writeFile(path,data,{ "flush" : true })   // WRITE file
-                    this.scp_client.send(path,spc_path)                      // SCP 
+                    this.copy_client.send(path,spc_path)                      // SCP 
                 }
             }
+            return path
         } catch (e) {
             console.log(e)
         }
+        return false
         //
     }
 
 
     // Here object is a blob
+    /**
+     * add
+     * 
+     * @param {object} object 
+     * @returns string - the cid of the object
+     */
     async add(object) {
         let cid = await hash_of(object)
         //
+        let meta = this.construct_meta(cid,object,false)
         if ( this.messenger ) {
             let message = {
                 "op" : "ADD",
                 "parameters" : {
                     "cid" : cid,
-                    "meta" : object    // ? must be the description of blob and not contain the blob data...
+                    "meta" : meta    // ? must be the description of blob and not contain the blob data...
                 }
             }
-            let result = this.messenger.set_on_path(message,"LAN-repo")  // where to upload te file
+            let result = await this.messenger.set_on_path(message,"LAN-repo")  // where to upload te file
             if ( result && (result.status === "OK") ) {
-                let scp_path = result.data.scp_path
-                await this.#file_writer(cid,scp_path,object)     // write the file locally
+                //
+                let scp_location = result.data.scp_location
+                let path = await this.#file_writer(cid,scp_location,object)     // write the file locally
+                //
+                if ( path !== false ) {
+                    this.metas[cid] = meta
+                    let  meta_path = `${this.conf.base_dir}/file_metas.json`
+                    await this.fos.output_json(meta_path,this.metas)
+            
+                    this.id_to_path[cid] = path
+                    let  paths_path = `${this.conf.base_dir}/file_paths.json`
+                    await this.fos.output_json(paths_path,this.id_to_path)    
+                }
             }
         }
         //
@@ -284,6 +373,11 @@ class WrapNode {
     }
 
 
+    /**
+     * 
+     * @param {*} in_path 
+     * @returns 
+     */
     async add_file(in_path) {
         let buffer = await this.fos.readFile(in_path)
         let name = path.basename(in_path)

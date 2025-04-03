@@ -12,7 +12,7 @@ class LANOperations extends OperationsCategory {
         this.dont_delete = []
         this.id_to_path = {}
         this.metas = {}
-
+        //
         this.reload_file_maps()
         this.setup_file_watch()
     }
@@ -67,6 +67,19 @@ class LANOperations extends OperationsCategory {
                 this.dont_delete.push(pin_id)
                 path = `${this.conf.base_dir}/safety_pins.json`
                 await this.fos.output_json(path,this.dont_delete)
+                return path
+            }
+        }
+        return false
+    }
+
+
+    async confirm_local(pin_id) {
+        let meta = this.id_to_path[pin_id]
+        if ( meta !== undefined ) {
+            let path = `${this.conf.base_dir}/${pin_id}`
+            let file_exists = await this.fos.exists(path)
+            if ( file_exists ) {
                 return path
             }
         }
@@ -138,10 +151,14 @@ class LANOperations extends OperationsCategory {
     }
 
 
+    /**
+     * application_operation_info_handling
+     * @param {string} cmd_op 
+     * @param {object} parameters 
+     * @returns object | false
+     */
 
     async application_operation_info_handling(cmd_op,parameters) {
-    console.log(cmd_op)
-    console.dir(parameters)
     //
         switch ( cmd_op ) {
             case "WANT" : {
@@ -153,6 +170,13 @@ class LANOperations extends OperationsCategory {
                 //
                 if ( pin ) {
                     let path = await this.store_local(cid)
+                    if ( path ) {
+                        return_data.scp_location = path
+                    } else {
+                        return false
+                    }
+                } else {
+                    let path = await this.confirm_local(cid)
                     if ( path ) {
                         return_data.scp_location = path
                     } else {
@@ -187,6 +211,12 @@ class LANOperations extends OperationsCategory {
         return false
     }
 
+    /**
+     * application_operation_cmd_handling
+     * @param {string} cmd_op 
+     * @param {object} parameters 
+     * @returns object | false
+     */
     async application_operation_cmd_handling(cmd_op,parameters) {
         switch ( cmd_op ) {
             case "ADD" : {

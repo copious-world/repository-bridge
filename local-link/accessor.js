@@ -56,16 +56,30 @@ class WrapNode {
 
 
 
+
     async reload_file_maps() {
         let  audit_path = `${this.conf.base_dir}/safety_pins.json`
         this.dont_delete = await this.fos.load_json_data_at_path(audit_path)
+        if ( this.dont_delete === false ) {
+            this.dont_delete = []
+            await this.fos.output_json(audit_path,this.dont_delete)
+        }
 //
         let  file_paths = `${this.conf.base_dir}/file_paths.json`
         this.id_to_path = await this.fos.load_json_data_at_path(file_paths)
+        if ( this.id_to_path === false ) {
+            this.id_to_path = {}
+            await this.fos.output_json(file_paths,this.id_to_path)
+        }
 // 
         let meta_path = `${this.conf.base_dir}/file_metas.json`
         this.metas = await this.fos.load_json_data_at_path(meta_path)
+        if ( this.metas === false ) {
+            this.metas = {}
+            await this.fos.output_json(meta_path,this.metas)
+        }
     }
+
 
     setup_file_watch() {
         let file_paths = `${this.conf.base_dir}/file_paths.json`
@@ -164,6 +178,22 @@ class WrapNode {
     }
 
     /**
+     * construct_meta
+     * 
+     * @param {string} cid 
+     * @param {string} type 
+     * @param {string} author 
+     */
+    construct_meta(cid,type,author) {
+        let  meta = {
+            "name" : `${cid}`,
+            "author" : (typeof author === "string") ? author : "unknown",
+            "type" : type
+        }
+        return meta
+    }
+
+    /**
      * #file_writer
      * 
      * @param {*} cid 
@@ -177,18 +207,10 @@ class WrapNode {
             if ( util.types.isUint8Array(some_object) || Buffer.isBuffer(some_object) ) {
                 const data = new Uint8Array(some_object);
                 await this.fos.writeFile(path,data,{ "flush" : true })
-                meta = {
-                    "name" : `${cid}`,
-                    "author" : "unknown",
-                    "type" : "Uint8Array"
-                }
+                meta = this.construct_meta(cid,"Uint8Array")
             } else if ( typeof some_object === 'string' ) {
                 await this.fos.writeFile(path,some_object,{ "flush" : true })
-                meta = {
-                    "name" : `${cid}`,
-                    "author" : "unknown",
-                    "type" : "string"
-                }
+                meta = this.construct_meta(cid,"string")
             } else {
                 let data = false
                 if ( some_object.hasOwnProperty('content') ) {
@@ -206,11 +228,7 @@ class WrapNode {
                         meta = some_object.meta
                         meta.type = "json"
                     } else {
-                        meta = {
-                            "name" : `${cid}`,
-                            "author" : "unknown",
-                            "type" : "json"
-                        }    
+                        meta = this.construct_meta(cid,"json")
                     }
                 }
             }
