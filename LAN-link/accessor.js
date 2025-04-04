@@ -91,6 +91,9 @@ class WrapNode {
         //
     }
 
+    /**
+     * ready
+     */
     async ready() {
         if ( !(this.client_ready) && this.ready_promise ) {
             await this.ready_promise
@@ -332,7 +335,6 @@ class WrapNode {
     }
 
 
-    // Here object is a blob
     /**
      * add
      * 
@@ -374,9 +376,9 @@ class WrapNode {
 
 
     /**
-     * 
-     * @param {*} in_path 
-     * @returns 
+     * add_file
+     * @param {string} in_path 
+     * @returns string -- the cid
      */
     async add_file(in_path) {
         let buffer = await this.fos.readFile(in_path)
@@ -391,6 +393,13 @@ class WrapNode {
     }
 
 
+    /**
+     * cat
+     * 
+     * 
+     * @param {string} cid 
+     * @returns stream
+     */
     async * cat(cid) {
         let meta = await this.#ensure_local(cid)
         if ( meta ) {
@@ -409,6 +418,12 @@ class WrapNode {
     }
 
 
+    /**
+     * ls
+     * 
+     * @param {string} cid 
+     * @returns stream of file stats object
+     */
     async * ls(cid) {
         let meta = await this.#ensure_local(cid)
         if ( meta ) {

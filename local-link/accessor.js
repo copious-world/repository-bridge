@@ -56,7 +56,10 @@ class WrapNode {
 
 
 
-
+    /**
+     * reload_file_maps
+     * 
+     */
     async reload_file_maps() {
         let  audit_path = `${this.conf.base_dir}/safety_pins.json`
         this.dont_delete = await this.fos.load_json_data_at_path(audit_path)
@@ -80,7 +83,10 @@ class WrapNode {
         }
     }
 
-
+    /**
+     * setup_file_watch
+     * 
+     */
     setup_file_watch() {
         let file_paths = `${this.conf.base_dir}/file_paths.json`
         let self = this
@@ -97,6 +103,11 @@ class WrapNode {
         })
     }
 
+    /**
+     * store_local
+     * 
+     * @param {string} pin_id 
+     */
     async store_local(pin_id) {
         let meta = this.id_to_path[pin_id]
         if ( meta !== undefined ) {
@@ -111,6 +122,7 @@ class WrapNode {
     }
 
     /**
+     * rm_local
      * 
      * @param {string} pin_id 
      */
@@ -240,6 +252,12 @@ class WrapNode {
 
 
     // Here object is a blob
+    /**
+     * add
+     * 
+     * @param {object} object 
+     * @returns string
+     */
     async add(object) {
         let cid = await hash_of(object)
         let path = `${this.conf.base_dir}/${cid}`
@@ -259,6 +277,12 @@ class WrapNode {
     }
 
 
+    /**
+     * add_file
+     * 
+     * @param {string} in_path 
+     * @returns 
+     */
     async add_file(in_path) {
         let buffer = await this.fos.readFile(in_path)
         let name = path.basename(in_path)
@@ -272,6 +296,12 @@ class WrapNode {
     }
 
 
+    /**
+     * cat
+     * 
+     * @param {string} cid 
+     * @returns stream
+     */
     async * cat(cid) {
         let path = this.id_to_path[cid]
         if ( path !== undefined ) {
@@ -287,6 +317,12 @@ class WrapNode {
     }
 
 
+    /**
+     * ls
+     * 
+     * @param {string} cid 
+     * @returns object -- a file stat report but as a stream
+     */
     async * ls(cid) {
         let path = this.id_to_path[cid]
         if ( path !== undefined ) {
@@ -305,6 +341,7 @@ class WrapNode {
         return this
     }
 }
+
 
 module.exports = {
     "init" : async (cnfg) =>  {
