@@ -63,11 +63,13 @@ class WrapNode {
  
         this.ensure_messenger_ready(conf.node_relay)
         //
-        if ( conf.local_only ) {
+        if ( conf.local_only && (typeof conf.ssh !== 'object') ) {
             this.copy_client = false
             this.copy_client = new LocalCopier()
         } else {
-            this.copy_client = new ScpClient(conf.address,conf.ssh_user,conf.ssh_pass)  // only need the address to tell scp
+            if ( conf.ssh ) {
+                this.copy_client = new ScpClient(conf.ssh.address,conf.ssh.user,conf.ssh.pass)  // only need the address to tell scp
+            }
         }
     }
 
