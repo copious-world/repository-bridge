@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 
 const {OperationsCategory} = require('categorical-handlers')
 const fs = require('fs')
@@ -292,6 +293,7 @@ class LANOperations extends OperationsCategory {
 }
 
 */
+
 
 
 let conf = false
