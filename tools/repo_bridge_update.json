@@ -1,0 +1,57 @@
+{
+    "link_manager" : {
+        "address" : "192.168.1.81",
+        "port"	: 5551,
+        "use_tls" : false,
+        "tls" : {
+            "preloaded" : {
+                "client_key" : false,
+                "server_cert" : false
+            },
+            "client_key" : false,
+            "server_cert" : false
+        },
+        "default_tls" : false,
+        "extended_tls_options" : false,
+        "send_on_reconnect" : false,
+        "attempt_reconnect" : false,
+        "max_reconnect" : 0,
+        "reconnect_wait" 0
+    },
+
+	"connections" : {
+    	"add_repo_type" : {
+			"action" : "add-service",
+ 			"target" : "module",
+			"parameters" : {
+				"target" : "repository",
+				"module" : "rb-IPFS-link",
+				"class_definition" : false,
+				"create" : false,
+				"share" : "direct_instance",
+				"conf" : {
+					"_app_add_support" : {
+						"IPFS" : "add-wrapper-instance"
+					},
+					"_replacements" : false,
+					"_activate_kinds" : [ "IPFS" ],
+					"IPFS" : {  }
+				}
+			}
+    	},
+    	"repo_update" : {
+			"action" : "update-service",
+ 			"target" : "module",
+			"parameters" : {
+				"target" : "repository",
+				"module" : "rb-IPFS-link",
+				"create" : false,
+				"share" : "direct_instance",
+				"conf" : {
+					"_activate_kinds" : [ "IPFS" ],
+					"IPFS" : {  }
+				}
+			}
+    	}
+    }
+}

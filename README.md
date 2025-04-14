@@ -164,7 +164,7 @@ let repo = new Repository({
 	"_app_add_support" : {
 		"IPFS" : ipfs_access,    // wrapper class instances
 		"TORv1" : tor_access
-	}
+	},
 	"local" : { ...necessary parameters... },
 	"LAN" : { ...necessary parameters... },
 	"IPFS" : { ...necessary parameters... }
@@ -185,7 +185,7 @@ For example, the following call can be made sometime when the service is running
 		"_app_add_support" : {
 			"IPFS" : ipfs_access,    // wrapper class instances
 			"TORv1" : tor_access
-		}
+		},
 		"_replacements" : { "IPFS" : true },
 		"_activate_kinds" : [ "IPFS" ],
 		"IPFS" : { ...necessary parameters... },
@@ -199,7 +199,7 @@ The method call will add new wrappers for "IPFS" and "TORv1", replacing a previo
 A later call could turn on "TORv1" as such:
 
 ```
-	await repo.update_supported_repositories(
+	await repo.update_supported_repositories({
 		"_activate_kinds" : [ "TORv1" ]
 	})
 ```
