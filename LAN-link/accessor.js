@@ -18,7 +18,6 @@ async function do_hash_text(text) {
     return hash
 }
 
-
 async function do_hash_buffer(buf) {
     const hBuffer = await subtle.digest("SHA-256",buf)
     const hArray = new Uint8Array(hBuffer);

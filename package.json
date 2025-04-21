@@ -1,6 +1,6 @@
 {
   "name": "repository-bridge",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "This module provides a simple CRUD API, enabling  applications to normalize the use of different P2P repositories.",
   "main": "index.js",
   "bin": {
@@ -27,6 +27,10 @@
   ],
   "author": "R. Leddy",
   "license": "MIT",
+  "funding": {
+    "type": "GitHub Sponsors",
+    "url": "https://github.com/sponsors/copious-world"
+  },
   "bugs": {
     "url": "https://github.com/copious-world/repository-bridge/issues"
   },
