@@ -77,10 +77,13 @@ class LANOperations extends OperationsCategory {
         if ( meta !== undefined ) {
             let path = `${this.data_dir}/${pin_id}`
             let file_exists = await this.fos.exists(path)
-            if ( file_exists && (this.dont_delete.indexOf(pin_id) < 0) ) {
+            let  = this.dont_delete.indexOf(pin_id)
+            if ( file_exists && (pin_index < 0) ) {
                 this.dont_delete.push(pin_id)
-                path = `${this.conf.base_dir}/safety_pins.json`
-                await this.fos.output_json(path,this.dont_delete)
+                let pin_path = `${this.conf.base_dir}/safety_pins.json`
+                await this.fos.output_json(pin_path,this.dont_delete)
+                return path
+            } else if ( file_exists && pin_index >= 0 ) {
                 return path
             }
         }
@@ -135,7 +138,7 @@ class LANOperations extends OperationsCategory {
                     delete this.id_to_path[pin_id]
                     let  file_paths = `${this.conf.base_dir}/file_paths.json`
                     await this.fos.output_json(file_paths,this.id_to_path)
-// 
+                    // 
                     delete this.metas[pin_id]
                     let meta_path = `${this.conf.base_dir}/file_metas.json`
                     await this.fos.output_json(meta_path,this.metas)
@@ -143,6 +146,7 @@ class LANOperations extends OperationsCategory {
             }
         }
     }
+
 
     /**
      * 
