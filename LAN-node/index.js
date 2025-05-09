@@ -75,7 +75,7 @@ class LANOperations extends OperationsCategory {
     async store_local(pin_id) {
         let meta = this.id_to_path[pin_id]
         if ( meta !== undefined ) {
-            let path = `${this.conf.base_dir}/${pin_id}`
+            let path = `${this.data_dir}/${pin_id}`
             let file_exists = await this.fos.exists(path)
             if ( file_exists && (this.dont_delete.indexOf(pin_id) < 0) ) {
                 this.dont_delete.push(pin_id)
@@ -91,7 +91,7 @@ class LANOperations extends OperationsCategory {
     async confirm_local(pin_id) {
         let meta = this.id_to_path[pin_id]
         if ( meta !== undefined ) {
-            let path = `${this.conf.base_dir}/${pin_id}`
+            let path = `${this.data_dir}/${pin_id}`
             let file_exists = await this.fos.exists(path)
             if ( file_exists ) {
                 return path
@@ -155,7 +155,7 @@ class LANOperations extends OperationsCategory {
             let  audit_path = `${this.conf.base_dir}/safety_pins.json`
             await this.fos.output_json(audit_path,this.dont_delete)
 
-            let path = `${this.conf.base_dir}/${pin_id}`
+            let path = `${this.data_dir}/${pin_id}`
             let file_exists = await this.fos.exists(path)
             if ( file_exists ) {
                 return path
@@ -178,8 +178,11 @@ class LANOperations extends OperationsCategory {
             case "WANT" : {
                 //
                 let {cid, pin} = parameters
+                let meta = this.metas[cid]
+
                 let return_data = {
-                    "_app_log" : ""
+                    "_app_log" : "",
+                    "meta" : meta
                 }
                 //
                 if ( pin ) {
@@ -202,8 +205,11 @@ class LANOperations extends OperationsCategory {
             }
             case "PIN" : {
                 let {cid, pin} = parameters
+                let meta = this.metas[cid]
+
                 let return_data = {
-                    "_app_log" : ""
+                    "_app_log" : "",
+                    "meta" : meta
                 }
                 //
                 if ( pin ) {
@@ -248,8 +254,11 @@ class LANOperations extends OperationsCategory {
             }
             case "UNPIN" : {
                 let {cid} = parameters
+                let meta = this.metas[cid]
+
                 let return_data = {
-                    "_app_log" : ""
+                    "_app_log" : "",
+                    "meta" : meta
                 }
                 //
                 let path = await this.unpin_local(cid)
