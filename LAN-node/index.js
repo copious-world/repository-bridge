@@ -77,7 +77,7 @@ class LANOperations extends OperationsCategory {
         if ( meta !== undefined ) {
             let path = `${this.data_dir}/${pin_id}`
             let file_exists = await this.fos.exists(path)
-            let  = this.dont_delete.indexOf(pin_id)
+            let pin_index = this.dont_delete.indexOf(pin_id)
             if ( file_exists && (pin_index < 0) ) {
                 this.dont_delete.push(pin_id)
                 let pin_path = `${this.conf.base_dir}/safety_pins.json`
