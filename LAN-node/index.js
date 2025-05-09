@@ -3,6 +3,12 @@
 const {OperationsCategory} = require('categorical-handlers')
 const fs = require('fs')
 
+const resolve = require('path').resolve
+
+
+function absolute_dir(data_dir) {
+    return resolve(data_dir)
+}
 
 class LANOperations extends OperationsCategory {
 
@@ -13,6 +19,13 @@ class LANOperations extends OperationsCategory {
         this.dont_delete = []
         this.id_to_path = {}
         this.metas = {}
+        //
+        this.data_dir = this.conf.base_dir
+        if ( this.data_dir === undefined ) {
+            this.data_dir = `${process.cwd()}/LAN_dat`
+        } else {
+            this.data_dir = absolute_dir(this.data_dir)
+        }
         //
         this.reload_file_maps()
         this.setup_file_watch()
@@ -91,7 +104,7 @@ class LANOperations extends OperationsCategory {
 
     // Here object is a blob
     async add(cid,meta) {
-        let path = `${this.conf.base_dir}/${cid}`
+        let path = `${this.data_dir}/${cid}`
         //
         this.metas[cid] = meta
         let  meta_path = `${this.conf.base_dir}/file_metas.json`

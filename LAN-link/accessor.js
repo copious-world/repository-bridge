@@ -222,7 +222,7 @@ class WrapNode {
         let meta = await this.#ensure_local(cid)
         let local_path = `${this.conf.base_dir}/${cid}`
         //
-        if ( (local_path !== undefined) && (meta !== undefined) ) {
+        if ( (local_path !== undefined) && (meta !== undefined) && meta ) {
             try {
                 let data = ""
                 switch ( meta.type ) {
@@ -313,10 +313,10 @@ class WrapNode {
             if ( util.types.isUint8Array(some_object) || Buffer.isBuffer(some_object) ) {
                 const data = new Uint8Array(some_object);
                 await this.fos.writeFile(path,data,{ "flush" : true })  // WRITE file to local config'd dir
-                this.copy_client.send(path,spc_path)     // SCP straight up (should be configured no password) just spawn
+                await this.copy_client.send(path,spc_path)     // SCP straight up (should be configured no password) just spawn
             } else if ( typeof some_object === 'string' ) {
                 await this.fos.writeFile(path,some_object,{ "flush" : true })   // WRITE file
-                this.copy_client.send(path,spc_path)                             // SCP 
+                await this.copy_client.send(path,spc_path)                             // SCP 
             } else {
                 let data = false
                 if ( some_object.hasOwnProperty('content') ) {
@@ -324,7 +324,7 @@ class WrapNode {
                 } else {
                     data = JSON.stringify(some_object)
                     await this.fos.writeFile(path,data,{ "flush" : true })   // WRITE file
-                    this.copy_client.send(path,spc_path)                      // SCP 
+                    await this.copy_client.send(path,spc_path)                      // SCP 
                 }
             }
             return path
