@@ -171,6 +171,19 @@ class WrapNode {
         await this.messenger.set_on_path(message,"LAN-repo")
     }
 
+
+    
+    async #update_metas(cid,path,meta) {
+        this.metas[cid] = meta
+        let  meta_path = `${this.conf.base_dir}/file_metas.json`
+        await this.fos.output_json(meta_path,this.metas)
+        //
+        this.id_to_path[cid] = path
+        let  paths_path = `${this.conf.base_dir}/file_paths.json`
+        await this.fos.output_json(paths_path,this.id_to_path)
+    }
+
+
     /**
      * #ensure_local
      * 
@@ -196,6 +209,7 @@ class WrapNode {
                     },"LAN-repo")
                     if ( result && (result.status === "OK") ) {
                         meta = result.data.meta
+                        await this.#update_metas(cid,local_path,meta)
                         let scp_location = result.data.scp_location
                         await this.copy_client.fetch(scp_location,local_path)
                     }
