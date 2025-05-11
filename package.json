@@ -1,6 +1,6 @@
 {
   "name": "repository-bridge",
-  "version": "0.9.17",
+  "version": "0.9.18",
   "description": "This module provides a simple CRUD API, enabling  applications to normalize the use of different P2P repositories.",
   "main": "index.js",
   "bin": {
@@ -40,8 +40,8 @@
     "nyc": "^15.1.0"
   },
   "dependencies": {
-    "categorical-handlers": "^0.7.5",
+    "categorical-handlers": "^0.7.6",
     "extra-file-class": "^0.9.20",
-    "message-relay-services": "^0.9.25"
+    "message-relay-services": "^0.9.27"
   }
 }

@@ -4,6 +4,7 @@ const {subtle} = require('crypto')
 const util = require('util');
 const path = require('path')
 const {MessageRelayer} = require('message-relay-services')
+const LinkManager = require('com_link_manager')
 
 
 const ScpClient = require('../support_lib/scp_spawner')
@@ -59,6 +60,13 @@ class WrapNode {
         this.messenger = false
         this.ready_promise = false
         this.client_ready = false
+
+
+        this.allow_com_link_manager = false
+        if ( conf.allow_com_link_manager && conf.com_link ) {  // an endpoint server for the connector
+            this.allow_com_link_manager = true
+            this.link_manager = new LinkManager(conf.com_link )
+        }
  
         this.ensure_messenger_ready(conf.node_relay)
         //
@@ -87,6 +95,13 @@ class WrapNode {
                 self.client_ready = true
                 resolve(true)
             })
+            self.messenger.on('client-connect-error', (host,port,e_code) => {
+                if ( self.allow_com_link_manager ) {
+
+                }
+                console.log("LAN link could not connect to host at port", host, port, e_code)
+                resolve(false)
+            })
         })
         this.ready_promise = p
         //
@@ -96,10 +111,12 @@ class WrapNode {
      * ready
      */
     async ready() {
+        let result = this.client_ready
         if ( !(this.client_ready) && this.ready_promise ) {
-            await this.ready_promise
+            result = await this.ready_promise
         }
         this.ready_promise = false
+        return result
     }
 
     /**
@@ -132,7 +149,7 @@ class WrapNode {
      * Can do things such as store a file in a directory accessible by a streamer.
      * 
      * Tells the "node", and endpoint server, to mark the file as pinned.
-     * Attempts to obtain the 
+     * Attempts to obtain the path to the file so as to move it to local directories
      * 
      * @param {string} pin_id 
      */

@@ -28,10 +28,13 @@ class LANOperations extends OperationsCategory {
         }
         //
         this.reload_file_maps()
-        this.setup_file_watch()
+        this.#setup_file_watch()
     }
 
 
+    /**
+     * reload_file_maps
+     */
     async reload_file_maps() {
         let  audit_path = `${this.conf.base_dir}/safety_pins.json`
         this.dont_delete = await this.fos.load_json_data_at_path(audit_path)
@@ -55,7 +58,10 @@ class LANOperations extends OperationsCategory {
         }
     }
 
-    setup_file_watch() {
+    /**
+     * #setup_file_watch
+     */
+    #setup_file_watch() {
         let file_paths = `${this.conf.base_dir}/file_paths.json`
         let self = this
         this.fos.fs.watchFile(file_paths,async (curr,prev) => {
@@ -72,6 +78,11 @@ class LANOperations extends OperationsCategory {
     }
 
 
+    /**
+     * store_local
+     * @param {string} pin_id 
+     * @returns string | boolean
+     */
     async store_local(pin_id) {
         let meta = this.id_to_path[pin_id]
         if ( meta !== undefined ) {
@@ -91,6 +102,11 @@ class LANOperations extends OperationsCategory {
     }
 
 
+    /**
+     * confirm_local
+     * @param {string} pin_id 
+     * @returns string | boolean
+     */
     async confirm_local(pin_id) {
         let meta = this.id_to_path[pin_id]
         if ( meta !== undefined ) {
@@ -105,7 +121,9 @@ class LANOperations extends OperationsCategory {
 
 
 
-    // Here object is a blob
+    /**
+     * add
+     */
     async add(cid,meta) {
         let path = `${this.data_dir}/${cid}`
         //
@@ -122,6 +140,7 @@ class LANOperations extends OperationsCategory {
 
 
     /**
+     * rm_local
      * 
      * @param {string}} pin_id 
      */
