@@ -61,16 +61,8 @@ class WrapNode {
         this.ready_promise = false
         this.client_ready = false
 
-
         this.allow_com_link_manager = false
-        if ( conf.allow_com_link_manager && conf.com_link ) {  // an endpoint server for the connector
-            this.lan_node_target = "LAN-node"
-            if ( typeof conf.lan_node_target  === "string" ) {
-                this.lan_node_target = conf.lan_node_target
-            }
-            this.allow_com_link_manager = true
-            this.link_manager = new LinkManager(conf.com_link)
-        }
+        this.set_link_manager(conf)
  
         this.ensure_messenger_ready(conf.node_relay)
         //
@@ -80,6 +72,25 @@ class WrapNode {
         } else {
             if ( conf.ssh ) {
                 this.copy_client = new ScpClient(conf.ssh.address,conf.ssh.user,conf.ssh.pass)  // only need the address to tell scp
+            }
+        }
+    }
+
+
+    /**
+     * set_link_manager
+     */
+    set_link_manager(conf,link_m) {
+        if ( conf.allow_com_link_manager && conf.com_link ) {  // an endpoint server for the connector
+            this.lan_node_target = "LAN-node"
+            if ( typeof conf.lan_node_target  === "string" ) {
+                this.lan_node_target = conf.lan_node_target
+            }
+            this.allow_com_link_manager = true
+            if ( typeof link_m === "object" ) {
+                this.link_manager = link_m
+            } else {
+                this.link_manager = new LinkManager(conf.com_link)
             }
         }
     }
