@@ -37,7 +37,7 @@ class ScpClient {
             })    
         } else {
             p = new Promise((resolve,reject) => {
-                let params = ["-p", `"${this.cmd_line_password}"`, 'scp',`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`,local_file]
+                let params = ["-p", `${this.cmd_line_password}`, 'scp',`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`,local_file]
                 let spawner = spawn("sshpass", params ,{})
                 spawner.on('exit',(status) => {
                     resolve(true)
@@ -66,7 +66,7 @@ console.log("send",params)
             })
         } else {
             p = new Promise((resolve,reject) => {
-                let params = ["-p", `"${this.cmd_line_password}"`, 'scp',local_file,`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`]
+                let params = ["-p", `${this.cmd_line_password}`, 'scp',local_file,`${this.ssh_user}@${this.ssh_server_addr}:${remote_file}`]
                 let spawner = spawn("sshpass", params,{})
                 spawner.on('exit',(status) => {
                     resolve(true)

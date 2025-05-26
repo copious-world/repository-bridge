@@ -123,6 +123,10 @@ class LANOperations extends OperationsCategory {
 
     /**
      * add
+     * 
+     * @param {string} cid 
+     * @param {object} meta
+     * 
      */
     async add(cid,meta) {
         let path = `${this.data_dir}/${cid}`
@@ -142,7 +146,7 @@ class LANOperations extends OperationsCategory {
     /**
      * rm_local
      * 
-     * @param {string}} pin_id 
+     * @param {string} pin_id 
      */
     async rm_local(pin_id) {
         let findex = this.dont_delete.indexOf(pin_id)
@@ -168,6 +172,8 @@ class LANOperations extends OperationsCategory {
 
 
     /**
+     * unpin_local
+     * 
      * 
      * @param {string} pin_id 
      */
@@ -190,6 +196,7 @@ class LANOperations extends OperationsCategory {
 
     /**
      * application_operation_info_handling
+     * 
      * @param {string} cmd_op 
      * @param {object} parameters 
      * @returns object | false
@@ -256,6 +263,7 @@ class LANOperations extends OperationsCategory {
 
     /**
      * application_operation_cmd_handling
+     * 
      * @param {string} cmd_op 
      * @param {object} parameters 
      * @returns object | false
