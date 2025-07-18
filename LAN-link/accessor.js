@@ -90,7 +90,7 @@ class WrapNode {
             if ( typeof link_m === "object" ) {
                 this.link_manager = link_m
             } else {
-                this.link_manager = new LinkManager(conf.com_link)
+                this.link_manager = new LinkManager(conf.link_manager)
             }
         }
     }
